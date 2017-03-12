@@ -1,3 +1,5 @@
+package app.utils.ds;
+
 import app.utils.ds.HuffmanNode;
 
 import org.junit.*;

@@ -1,3 +1,5 @@
+package app.utils.ds;
+
 import app.utils.ds.HuffmanTree;
 
 import org.junit.*;

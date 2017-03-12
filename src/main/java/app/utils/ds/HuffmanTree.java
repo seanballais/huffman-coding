@@ -51,8 +51,7 @@ public class HuffmanTree
 				}
 			}
 		}
-		
-		System.out.println(decompressedText);
+
 		return decompressedText;
 	}
 
