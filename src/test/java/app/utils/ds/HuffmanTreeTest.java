@@ -13,12 +13,12 @@ public class HuffmanTreeTest
 		assertEquals(
 			"Huffman Tree must return bitstring of '111100110110010111010101010001001001010111011000'",
 			"111100110110010111010101010001001001010111011000",
-			tree.compress("jeff_is_awesome")
+			tree.compressFromString("jeff_is_awesome")
 		);
 		assertEquals(
 			"Huffman Tree must return a decompressed text that is equal to the original text.",
 			"jeff_is_awesome",
-			tree.decompress(tree.compress("jeff_is_awesome"))
+			tree.decompress(tree.compressFromString("jeff_is_awesome"))
 		);
 	}
 }

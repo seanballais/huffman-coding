@@ -3,10 +3,17 @@ package app.utils.ds;
 import java.util.PriorityQueue;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.charset.Charset;
+import java.io.IOException;
 
 public class HuffmanTree
 {
 	private HuffmanNode root;
+	private HashMap<Character, Integer> frequencyStat;
+	private HashMap<Character, String> characterMapping;
 	
 	public HuffmanTree()
 	{
@@ -17,9 +24,34 @@ public class HuffmanTree
 		this.root = new HuffmanNode('\0', 0);
 	}
 	
-	public String compress(String text)
+	public String compressFromString(String text)
 	{
-		HashMap<Character, String> characterMapping = this.buildCoding(text);
+		if (this.frequencyStat == null) {
+			System.out.println("NULL!");
+			this.frequencyStat = this.getCharacterFrequencyFromString(text);
+		}
+		
+		return this.compress(text);
+	}
+	
+	public String compressFromFile(String text, String filename) throws IOException
+	{
+		if (this.frequencyStat == null) {
+			try {
+				this.frequencyStat = this.getCharacterFrequencyFromFile(filename);;	
+			} catch (IOException ex) {
+				throw ex;
+			}
+		}
+		
+		return this.compress(text);
+	}
+	
+	private String compress(String text)
+	{
+		if (this.characterMapping == null) {
+			this.characterMapping = this.buildCoding();
+		}		
 		
 		String compressedText = "";
 		for (char c : text.toCharArray()) {
@@ -54,17 +86,44 @@ public class HuffmanTree
 
 		return decompressedText;
 	}
-
-	private HashMap<Character, Integer> getCharacterFrequency(String targetText)
+	
+	public void cleanup()
 	{
-		HashMap<Character, Integer> frequencyStat = new HashMap<Character, Integer>();
+		this.root = null;
+		this.frequencyStat = null;
+		this.characterMapping = null;
+	}
+	
+	private HashMap<Character, Integer> getCharacterFrequencyFromFile(String filename) throws IOException
+	{
+		HashMap<Character, Integer> characterFrequency = new HashMap<Character, Integer>();
 		
-		for (char c : targetText.toCharArray()) {
-			int count = frequencyStat.containsKey(c) ? frequencyStat.get(c) : 0;
-			frequencyStat.put(c, count + 1);
+		Charset cs = Charset.forName("US-ASCII");
+		try {
+			List<String> lines = Files.readAllLines(Paths.get(filename), cs);
+			
+			for (String line : lines ) {
+				String[] statistic = line.split(" ");
+				characterFrequency.put(Character.toLowerCase(statistic[0].charAt(0)), Integer.parseInt(statistic[1]));
+			}
+		} catch (IOException ex) {
+			throw ex;
 		}
 		
-		return frequencyStat;
+		return characterFrequency;
+	}
+
+	private HashMap<Character, Integer> getCharacterFrequencyFromString(String targetText)
+	{
+		HashMap<Character, Integer> characterFrequency = new HashMap<Character, Integer>();
+		
+		for (char c : targetText.toCharArray()) {
+			c = Character.toLowerCase(c);
+			int count = characterFrequency.containsKey(c) ? characterFrequency.get(c) : 0;
+			characterFrequency.put(c, count + 1);
+		}
+		
+		return characterFrequency;
 	}
 	
 	private PriorityQueue<HuffmanNode> createQueue(HashMap<Character, Integer> characterFrequency)
@@ -111,10 +170,9 @@ public class HuffmanTree
 		return mapping;
 	}
 	
-	private HashMap<Character, String> buildCoding(String targetText)
+	private HashMap<Character, String> buildCoding()
 	{
-		HashMap<Character, Integer> characterFrequency = this.getCharacterFrequency(targetText);
-		PriorityQueue<HuffmanNode> nodes = this.createQueue(characterFrequency);
+		PriorityQueue<HuffmanNode> nodes = this.createQueue(this.frequencyStat);
 		
 		while (nodes.size() != 1) {
 			// Pop all nodes until there is only one element in the queue
@@ -126,7 +184,7 @@ public class HuffmanTree
 			nodes.add(this.createSubtree(parent, leftChild, rightChild));
 		}
 		
-		this.root = nodes.poll(); // Get the last remaining node in the queue which is the resulting Huffman Tree\
+		this.root = nodes.poll(); // Get the last remaining node in the queue which is the resulting Huffman Tree
 
 		return this.getCharacterMapping(new HashMap<Character, String>(), this.root, "");
 	}

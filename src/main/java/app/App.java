@@ -8,6 +8,6 @@ public class App
 	{
 		HuffmanTree tree = new HuffmanTree();
 		
-		System.out.println(tree.decompress(tree.compress("jeff_is_awesome")));
+		System.out.println(tree.decompress(tree.compressFromString("jeff_is_awesome")));
 	}
 }
