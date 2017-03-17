@@ -1,5 +1,7 @@
 package app.utils.ds;
 
+import app.utils.exceptions.FileFormatException;
+
 import java.util.PriorityQueue;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -17,9 +19,6 @@ public class HuffmanTree
 	
 	public HuffmanTree()
 	{
-		// Not planning to initialize the target text here cause that would mean that
-		// the text to be compressed is static. However, the text can be changed depending
-		// on the input. Input on this will be appreciated.
 
 		this.root = new HuffmanNode('\0', 0);
 	}
@@ -27,20 +26,21 @@ public class HuffmanTree
 	public String compressFromString(String text)
 	{
 		if (this.frequencyStat == null) {
-			System.out.println("NULL!");
 			this.frequencyStat = this.getCharacterFrequencyFromString(text);
 		}
 		
 		return this.compress(text);
 	}
 	
-	public String compressFromFile(String text, String filename) throws IOException
+	public String compressFromFile(String text, String filename) throws IOException, FileFormatException
 	{
 		if (this.frequencyStat == null) {
 			try {
 				this.frequencyStat = this.getCharacterFrequencyFromFile(filename);;	
-			} catch (IOException ex) {
-				throw ex;
+			} catch (IOException iex) {
+				throw iex;
+			} catch (FileFormatException ffex) {
+				throw ffex;
 			}
 		}
 		
@@ -94,7 +94,7 @@ public class HuffmanTree
 		this.characterMapping = null;
 	}
 	
-	private HashMap<Character, Integer> getCharacterFrequencyFromFile(String filename) throws IOException
+	private HashMap<Character, Integer> getCharacterFrequencyFromFile(String filename) throws IOException, FileFormatException
 	{
 		HashMap<Character, Integer> characterFrequency = new HashMap<Character, Integer>();
 		
@@ -102,8 +102,14 @@ public class HuffmanTree
 		try {
 			List<String> lines = Files.readAllLines(Paths.get(filename), cs);
 			
+			int lineCount = 0;
 			for (String line : lines ) {
-				String[] statistic = line.split(" ");
+				lineCount++;
+				if (!line.matches("^([\\w.]{1})([-]){1}([\\d]+)$")) {
+					throw new FileFormatException("Incorrect format in line " + lineCount + " in the given file.");
+				}
+				
+				String[] statistic = line.split("-");
 				characterFrequency.put(Character.toLowerCase(statistic[0].charAt(0)), Integer.parseInt(statistic[1]));
 			}
 		} catch (IOException ex) {
