@@ -10,8 +10,8 @@ public class App
 	{
 		AppFrame appFrame = new AppFrame();
 		appFrame.setTitle("Huffman Compression and Decompression");
-		appFrame.setSize(800, 190);
-		appFrame.setResizable(true);
+		appFrame.setSize(800, 200);
+		appFrame.setResizable(false);
 		appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		appFrame.setVisible(true);
 	}
