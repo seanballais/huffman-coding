@@ -2,6 +2,7 @@ package app.utils.ds;
 
 import app.utils.ds.HuffmanTree;
 import app.utils.exceptions.FileFormatException;
+import app.utils.exceptions.NoSuchLetterInMappingException;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -14,25 +15,40 @@ public class HuffmanTreeTest
 	@Test public void compressionDecompressionStringTest()
 	{
 		HuffmanTree tree = new HuffmanTree();
-		String testText = "jeff_is_awesome";
-		String compressedText = tree.compressFromString(testText);
+		String testText = "jeff_is_Awesome";
+		
+		String compressedText = "";
+		try {
+			compressedText = tree.compressFromString(testText);
+		} catch (NoSuchLetterInMappingException nex) {
+			fail("Huffman tree should be able to compress the string without any problems.");
+		}
 		
 		assertEquals(
 			"Huffman Tree must return bitstring of '111100110110010111010101010001001001010111011000'",
 			"111100110110010111010101010001001001010111011000",
 			compressedText
 		);
+
 		assertEquals(
 			"Huffman Tree must return a decompressed text that is equal to the original text.",
 			"jeff_is_awesome",
 			tree.decompress(compressedText)
 		);
+		
+		try {
+			testText = "zebra";
+			compressedText = tree.compressFromString(testText);
+			fail("Huffman tree should throw an exception because 'z', 'b', and, 'r' are not in the current coding.");
+		} catch (NoSuchLetterInMappingException nex) {
+			assertEquals(nex.getMessage(), "Character 'z' does not appear in Huffman mapping");
+		}
 	}
 	
 	@Test public void compressionDecompressionFileText()
 	{
 		HuffmanTree tree = new HuffmanTree();
-		String testText = "jeff_is_awesome";
+		String testText = "jeff_is_Awesome";
 		URL fileURL = this.getClass().getResource("/txt/stat.txt");
 		String filePath = fileURL.getPath().replaceAll("%20", "\\ ");
 		String compressedText = "";
@@ -43,11 +59,13 @@ public class HuffmanTreeTest
 			fail("File does not exist or you have no permission to access " + iex.getMessage());
 		} catch (FileFormatException ffex) {
 			fail(ffex.getMessage());
+		} catch (NoSuchLetterInMappingException nex) {
+			fail("Huffman tree should be able to compress the string without any problems.");
 		}
 		
 		assertEquals(
 			"Huffman Tree must return bitstring of '1000'",
-			"",
+			"0011010000110010100101001101010011001001001101010011101111010111001110100111011",
 			compressedText
 		);
 		assertEquals(
@@ -55,6 +73,14 @@ public class HuffmanTreeTest
 			"jeff_is_awesome",
 			tree.decompress(compressedText)
 		);
+		
+		try {
+			testText = "!";
+			compressedText = tree.compressFromString(testText);
+			fail("Huffman tree should throw an exception because '!' is not in the current coding.");
+		} catch (NoSuchLetterInMappingException nex) {
+			assertEquals(nex.getMessage(), "Character '!' does not appear in Huffman mapping");
+		}
 	}
 	
 	@Test public void contentFormatIncorrectTest()
@@ -80,6 +106,8 @@ public class HuffmanTreeTest
 			fail("File does not exist or you have no permission to access " + iex.getMessage());
 		} catch (FileFormatException ffex) {
 			assertEquals(ffex.getMessage(), "Incorrect format in line 1 in the given file.");
+		} catch (NoSuchLetterInMappingException nex) {
+			fail("Huffman tree should be able to compress the string without any problems.");
 		}
 	}
 	

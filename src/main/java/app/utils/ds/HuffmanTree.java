@@ -1,6 +1,7 @@
 package app.utils.ds;
 
 import app.utils.exceptions.FileFormatException;
+import app.utils.exceptions.NoSuchLetterInMappingException;
 
 import java.util.PriorityQueue;
 import java.util.Comparator;
@@ -23,16 +24,23 @@ public class HuffmanTree
 		this.root = new HuffmanNode('\0', 0);
 	}
 	
-	public String compressFromString(String text)
+	public String compressFromString(String text) throws NoSuchLetterInMappingException
 	{
 		if (this.frequencyStat == null) {
 			this.frequencyStat = this.getCharacterFrequencyFromString(text);
 		}
 		
-		return this.compress(text);
+		String compressedText = "";
+		try {
+			compressedText = this.compress(text);
+		} catch (NoSuchLetterInMappingException nex) {
+			throw nex;
+		}
+		
+		return compressedText;
 	}
 	
-	public String compressFromFile(String text, String filename) throws IOException, FileFormatException
+	public String compressFromFile(String text, String filename) throws IOException, FileFormatException, NoSuchLetterInMappingException
 	{
 		if (this.frequencyStat == null) {
 			try {
@@ -44,18 +52,11 @@ public class HuffmanTree
 			}
 		}
 		
-		return this.compress(text);
-	}
-	
-	private String compress(String text)
-	{
-		if (this.characterMapping == null) {
-			this.characterMapping = this.buildCoding();
-		}		
-		
 		String compressedText = "";
-		for (char c : text.toCharArray()) {
-			compressedText += characterMapping.get(c);
+		try {
+			compressedText = this.compress(text);
+		} catch (NoSuchLetterInMappingException nex) {
+			throw nex;
 		}
 		
 		return compressedText;
@@ -87,11 +88,41 @@ public class HuffmanTree
 		return decompressedText;
 	}
 	
+	public HuffmanNode getTreeRoot()
+	{
+		return this.root;
+	}
+	
+	public HashMap<Character, String> getCoding()
+	{
+		return this.characterMapping;
+	}
+	
 	public void cleanup()
 	{
 		this.root = null;
 		this.frequencyStat = null;
 		this.characterMapping = null;
+	}
+	
+	private String compress(String text) throws NoSuchLetterInMappingException
+	{
+		if (this.characterMapping == null) {
+			this.characterMapping = this.buildCoding();
+		}		
+		
+		String compressedText = "";
+		for (char c : text.toCharArray()) {
+			c = Character.toLowerCase(c); // We convert to lower case since we're case-insensitive.
+			String mapping = characterMapping.get(c);
+			if (mapping == null) {
+				throw new NoSuchLetterInMappingException("Character '" + c + "' does not appear in Huffman mapping");
+			}
+			
+			compressedText += mapping;
+		}
+		
+		return compressedText;
 	}
 	
 	private HashMap<Character, Integer> getCharacterFrequencyFromFile(String filename) throws IOException, FileFormatException
