@@ -2,7 +2,7 @@ package app.utils.ds;
 
 import app.utils.ds.HuffmanTree;
 import app.utils.exceptions.FileFormatException;
-import app.utils.exceptions.NoSuchLetterInMappingException;
+import app.utils.exceptions.NoSuchCharacterInMappingException;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -20,7 +20,7 @@ public class HuffmanTreeTest
 		String compressedText = "";
 		try {
 			compressedText = tree.compressFromString(testText);
-		} catch (NoSuchLetterInMappingException nex) {
+		} catch (NoSuchCharacterInMappingException nex) {
 			fail("Huffman tree should be able to compress the string without any problems.");
 		}
 		
@@ -40,7 +40,7 @@ public class HuffmanTreeTest
 			testText = "zebra";
 			compressedText = tree.compressFromString(testText);
 			fail("Huffman tree should throw an exception because 'z', 'b', and, 'r' are not in the current coding.");
-		} catch (NoSuchLetterInMappingException nex) {
+		} catch (NoSuchCharacterInMappingException nex) {
 			assertEquals(nex.getMessage(), "Character 'z' does not appear in Huffman mapping");
 		}
 	}
@@ -59,7 +59,7 @@ public class HuffmanTreeTest
 			fail("File does not exist or you have no permission to access " + iex.getMessage());
 		} catch (FileFormatException ffex) {
 			fail(ffex.getMessage());
-		} catch (NoSuchLetterInMappingException nex) {
+		} catch (NoSuchCharacterInMappingException nex) {
 			fail("Huffman tree should be able to compress the string without any problems.");
 		}
 		
@@ -78,7 +78,7 @@ public class HuffmanTreeTest
 			testText = "!";
 			compressedText = tree.compressFromString(testText);
 			fail("Huffman tree should throw an exception because '!' is not in the current coding.");
-		} catch (NoSuchLetterInMappingException nex) {
+		} catch (NoSuchCharacterInMappingException nex) {
 			assertEquals(nex.getMessage(), "Character '!' does not appear in Huffman mapping");
 		}
 	}
@@ -106,7 +106,7 @@ public class HuffmanTreeTest
 			fail("File does not exist or you have no permission to access " + iex.getMessage());
 		} catch (FileFormatException ffex) {
 			assertEquals(ffex.getMessage(), "Incorrect format in line 1 in the given file.");
-		} catch (NoSuchLetterInMappingException nex) {
+		} catch (NoSuchCharacterInMappingException nex) {
 			fail("Huffman tree should be able to compress the string without any problems.");
 		}
 	}

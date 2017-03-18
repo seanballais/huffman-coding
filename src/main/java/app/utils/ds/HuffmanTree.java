@@ -1,7 +1,7 @@
 package app.utils.ds;
 
 import app.utils.exceptions.FileFormatException;
-import app.utils.exceptions.NoSuchLetterInMappingException;
+import app.utils.exceptions.NoSuchCharacterInMappingException;
 
 import java.util.PriorityQueue;
 import java.util.Comparator;
@@ -24,7 +24,7 @@ public class HuffmanTree
 		this.root = new HuffmanNode('\0', 0);
 	}
 	
-	public String compressFromString(String text) throws NoSuchLetterInMappingException
+	public String compressFromString(String text) throws NoSuchCharacterInMappingException
 	{
 		if (this.frequencyStat == null) {
 			this.frequencyStat = this.getCharacterFrequencyFromString(text);
@@ -33,14 +33,14 @@ public class HuffmanTree
 		String compressedText = "";
 		try {
 			compressedText = this.compress(text);
-		} catch (NoSuchLetterInMappingException nex) {
+		} catch (NoSuchCharacterInMappingException nex) {
 			throw nex;
 		}
 		
 		return compressedText;
 	}
 	
-	public String compressFromFile(String text, String filename) throws IOException, FileFormatException, NoSuchLetterInMappingException
+	public String compressFromFile(String text, String filename) throws IOException, FileFormatException, NoSuchCharacterInMappingException
 	{
 		if (this.frequencyStat == null) {
 			try {
@@ -55,7 +55,7 @@ public class HuffmanTree
 		String compressedText = "";
 		try {
 			compressedText = this.compress(text);
-		} catch (NoSuchLetterInMappingException nex) {
+		} catch (NoSuchCharacterInMappingException nex) {
 			throw nex;
 		}
 		
@@ -105,7 +105,7 @@ public class HuffmanTree
 		this.characterMapping = null;
 	}
 	
-	private String compress(String text) throws NoSuchLetterInMappingException
+	private String compress(String text) throws NoSuchCharacterInMappingException
 	{
 		if (this.characterMapping == null) {
 			this.characterMapping = this.buildCoding();
@@ -116,7 +116,7 @@ public class HuffmanTree
 			c = Character.toLowerCase(c); // We convert to lower case since we're case-insensitive.
 			String mapping = characterMapping.get(c);
 			if (mapping == null) {
-				throw new NoSuchLetterInMappingException("Character '" + c + "' does not appear in Huffman mapping");
+				throw new NoSuchCharacterInMappingException("Character '" + c + "' does not appear in Huffman mapping");
 			}
 			
 			compressedText += mapping;
