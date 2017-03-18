@@ -20,7 +20,6 @@ public class HuffmanTree
 	
 	public HuffmanTree()
 	{
-
 		this.root = new HuffmanNode('\0', 0);
 	}
 	
@@ -96,6 +95,11 @@ public class HuffmanTree
 	public HashMap<Character, String> getCoding()
 	{
 		return this.characterMapping;
+	}
+	
+	public boolean hasCoding()
+	{
+		return this.characterMapping != null;
 	}
 	
 	public void cleanup()
