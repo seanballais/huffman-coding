@@ -78,6 +78,8 @@ public class AppFrame extends JFrame implements ActionListener
 			updateCompressButton();
 		} else if (event.getSource() == this.compressButton) {
 			this.compressedText(this.targetTextField.getText());
+			this.fileModeRButton.setEnabled(false);
+			this.inputModeRButton.setEnabled(false);
 		} else if (event.getSource() == this.decompressButton) {
 			this.decompressText(this.targetTextField.getText());
 		} else if (event.getSource() == this.showCodingButton) {
@@ -86,6 +88,15 @@ public class AppFrame extends JFrame implements ActionListener
 			this.tree.cleanup();
 			this.resetButton.setEnabled(false);
 			this.showCodingButton.setEnabled(false);
+			this.compressButton.setEnabled(false);
+			this.decompressButton.setEnabled(false);
+			this.showTreeButton.setEnabled(false);
+			this.showCodingButton.setEnabled(false);
+			this.fileModeRButton.setEnabled(true);
+			this.inputModeRButton.setEnabled(true);
+			this.modeButtonGroup.clearSelection();
+			this.modeMessageLabel.setText(" ");
+			this.outputTextField.setText("");
 			
 			this.huffmanCodingTable = null;
 		}
@@ -122,16 +133,17 @@ public class AppFrame extends JFrame implements ActionListener
 				JOptionPane.showMessageDialog(null, "<html>Oops! We had a problem retrieving the selected file. Make sure it<br>exists and you have permissions to access the file.", "An error while compressing text", JOptionPane.ERROR_MESSAGE);
 				return;
 			} catch (FileFormatException ffex) {
-				JOptionPane.showMessageDialog(null, "<html>" + ffex.getMessage() + "Make sure each line in the file follows the format:<br><character (there must only be one here)>-<frequency (must be an integer)>.</html>", "An error while compressing text", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "<html>" + ffex.getMessage() + " Make sure each line in the file follows the format:<br>[character (there must only be one here)]-[frequency (must be an integer)].</html>", "An error while compressing text", JOptionPane.ERROR_MESSAGE);
 				return;
 			} catch (NoSuchCharacterInMappingException nex) {
-				JOptionPane.showMessageDialog(null, "<html>Your input string contains characters that do not have a corresponding Huffman code<br>from the given file. We suggest adding the anomalous character to your statistical distribution file.</html>", "An error while compressing text", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "<html>Your input string contains characters that do not have a corresponding Huffman code<br>from the selected file. We suggest adding the anomalous character to your statistical distribution file.</html>", "An error while compressing text", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 		}
 		
 		this.resetButton.setEnabled(true);
 		this.showCodingButton.setEnabled(true);
+		this.showTreeButton.setEnabled(true);
 		this.outputTextField.setCaretPosition(0);		
 		this.outputTextField.setText(compressedText);
 	}
