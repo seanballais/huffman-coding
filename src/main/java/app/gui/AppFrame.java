@@ -4,6 +4,10 @@ import app.utils.ds.HuffmanTree;
 import app.utils.exceptions.FileFormatException;
 import app.utils.exceptions.NoSuchCharacterInMappingException;
 
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.view.Viewer;
+
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
@@ -82,23 +86,12 @@ public class AppFrame extends JFrame implements ActionListener
 			this.inputModeRButton.setEnabled(false);
 		} else if (event.getSource() == this.decompressButton) {
 			this.decompressText(this.targetTextField.getText());
+		} else if (event.getSource() == this.showTreeButton) {
+			this.showTree();
 		} else if (event.getSource() == this.showCodingButton) {
 			this.showCoding();
 		} else if (event.getSource() == this.resetButton) {
-			this.tree.cleanup();
-			this.resetButton.setEnabled(false);
-			this.showCodingButton.setEnabled(false);
-			this.compressButton.setEnabled(false);
-			this.decompressButton.setEnabled(false);
-			this.showTreeButton.setEnabled(false);
-			this.showCodingButton.setEnabled(false);
-			this.fileModeRButton.setEnabled(true);
-			this.inputModeRButton.setEnabled(true);
-			this.modeButtonGroup.clearSelection();
-			this.modeMessageLabel.setText(" ");
-			this.outputTextField.setText("");
-			
-			this.huffmanCodingTable = null;
+			this.resetTree();
 		}
 	}
 	
@@ -151,6 +144,22 @@ public class AppFrame extends JFrame implements ActionListener
 	private void decompressText(String compressedText)
 	{
 		this.outputTextField.setText(this.tree.decompress(compressedText));
+	}
+	
+	private void showTree()
+	{
+		Graph huffmanTree = new SingleGraph("Generated Huffman Tree");
+		huffmanTree.addNode("A");
+		huffmanTree.addNode("B");
+		huffmanTree.addNode("C");
+		huffmanTree.addEdge("AB", "A", "B");
+		huffmanTree.addEdge("AC", "A", "C");
+		huffmanTree.addAttribute("ui.quality");
+		huffmanTree.addAttribute("ui.antialias");
+		
+		Viewer treeViewer = huffmanTree.display();
+		treeViewer.enableAutoLayout();
+		treeViewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
 	}
 	
 	private void showCoding()
@@ -226,39 +235,32 @@ public class AppFrame extends JFrame implements ActionListener
 		}
 	}
 	
-	private void displayCodingDialog(JTable huffmanTable)
+	private void resetTree()
 	{
-		class HuffmanCodeDialog extends JDialog
-		{
-			private static final long serialVersionUID = -2462417535194452642L;
-
-			public HuffmanCodeDialog(JTable huffmanTable)
-			{
-				this.setLocationRelativeTo(null);
-				this.setLayout(new BorderLayout());
-				this.add(new JScrollPane(huffmanTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-				this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-				this.setModalityType(ModalityType.APPLICATION_MODAL);
-				this.pack();
-				this.setTitle("Huffman Coding");
-			}
-		}
+		this.tree.cleanup();
+		this.resetButton.setEnabled(false);
+		this.showCodingButton.setEnabled(false);
+		this.compressButton.setEnabled(false);
+		this.decompressButton.setEnabled(false);
+		this.showTreeButton.setEnabled(false);
+		this.showCodingButton.setEnabled(false);
+		this.fileModeRButton.setEnabled(true);
+		this.inputModeRButton.setEnabled(true);
+		this.modeButtonGroup.clearSelection();
+		this.modeMessageLabel.setText(" ");
+		this.outputTextField.setText("");
 		
+		this.huffmanCodingTable = null;
+	}
+	
+	private void displayCodingDialog(JTable huffmanTable)
+	{		
 		HuffmanCodeDialog huffmanCodeDialog = new HuffmanCodeDialog(huffmanTable);
 		huffmanCodeDialog.setVisible(true);
 	}
 	
 	private void setUpGUI()
 	{
-		/*
-		 * Programmer Note:
-		 *     For the output, we could have used a label to display the output. However, since the bit string can
-		 *     exceed the window, we used an uneditable text field to contain the text to allow us to just scroll
-		 *     through the text field (using a scroll bar), eliminating the need to resize the window to view the
-		 *     clipped parts of the bit string.
-		 *     
-		 * - SFB
-		 */		
 		this.initComponents();
 		this.addComponentsToFrame();
 		this.setComponentProperties();
@@ -338,6 +340,7 @@ public class AppFrame extends JFrame implements ActionListener
 		this.compressButton.addActionListener(this);
 		this.decompressButton.addActionListener(this);
 		this.resetButton.addActionListener(this);
+		this.showTreeButton.addActionListener(this);
 		this.showCodingButton.addActionListener(this);
 		
 		this.targetTextField.getDocument().addDocumentListener(new DocumentListener() {
@@ -382,6 +385,22 @@ public class AppFrame extends JFrame implements ActionListener
 			compressButton.setEnabled(true);
 		} else {
 			compressButton.setEnabled(false);
+		}
+	}
+	
+	private class HuffmanCodeDialog extends JDialog
+	{
+		private static final long serialVersionUID = -2462417535194452642L;
+
+		public HuffmanCodeDialog(JTable huffmanTable)
+		{
+			this.setLocationRelativeTo(null);
+			this.setLayout(new BorderLayout());
+			this.add(new JScrollPane(huffmanTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+			this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			this.setModalityType(ModalityType.APPLICATION_MODAL);
+			this.pack();
+			this.setTitle("Huffman Coding");
 		}
 	}
 }
