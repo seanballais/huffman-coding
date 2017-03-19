@@ -25,15 +25,19 @@ public class HuffmanNode
 	public void setLeftChild(HuffmanNode child)
 	{
 		this.leftChild = child;
-		this.frequency += this.leftChild.getFrequency();
-		child.setParent(this);
+		if (this.leftChild != null) {
+			this.frequency += this.leftChild.getFrequency();
+			child.setParent(this);
+		}
 	}
 	
 	public void setRightChild(HuffmanNode child)
 	{
 		this.rightChild = child;
-		this.frequency += this.rightChild.getFrequency();
-		child.setParent(this);
+		if (this.rightChild != null) {
+			this.frequency += this.rightChild.getFrequency();
+			child.setParent(this);
+		}
 	}
 	
 	public HuffmanNode getParent()

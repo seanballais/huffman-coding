@@ -43,6 +43,28 @@ public class HuffmanTreeTest
 		} catch (NoSuchCharacterInMappingException nex) {
 			assertEquals(nex.getMessage(), "Character 'z' does not appear in Huffman mapping");
 		}
+		
+		tree = new HuffmanTree();
+		testText = "!";
+		
+		compressedText = "";
+		try {
+			compressedText = tree.compressFromString(testText);
+		} catch (NoSuchCharacterInMappingException nex) {
+			fail("Huffman tree should be able to compress the string without any problems.");
+		}
+		
+		assertEquals(
+			"Huffman Tree must return bitstring of '0'",
+			"0",
+			compressedText
+		);
+
+		assertEquals(
+			"Huffman Tree must return a decompressed text that is equal to the original text.",
+			"!",
+			tree.decompress(compressedText)
+		);
 	}
 	
 	@Test public void compressionDecompressionFileText()

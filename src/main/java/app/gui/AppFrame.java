@@ -1,11 +1,17 @@
 package app.gui;
 
 import app.utils.ds.HuffmanTree;
+import app.utils.ds.HuffmanNode;
 import app.utils.exceptions.FileFormatException;
 import app.utils.exceptions.NoSuchCharacterInMappingException;
 
 import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.spriteManager.SpriteManager;
+import org.graphstream.ui.spriteManager.Sprite;
+import org.graphstream.ui.layout.HierarchicalLayout;
 import org.graphstream.ui.view.Viewer;
 
 import javax.swing.JFrame;
@@ -36,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class AppFrame extends JFrame implements ActionListener
 {
@@ -81,9 +88,7 @@ public class AppFrame extends JFrame implements ActionListener
 			this.modeMessageLabel.setText(" ");
 			updateCompressButton();
 		} else if (event.getSource() == this.compressButton) {
-			this.compressedText(this.targetTextField.getText());
-			this.fileModeRButton.setEnabled(false);
-			this.inputModeRButton.setEnabled(false);
+			this.compressText(this.targetTextField.getText());
 		} else if (event.getSource() == this.decompressButton) {
 			this.decompressText(this.targetTextField.getText());
 		} else if (event.getSource() == this.showTreeButton) {
@@ -95,8 +100,11 @@ public class AppFrame extends JFrame implements ActionListener
 		}
 	}
 	
-	private void compressedText(String targetText)
+	private void compressText(String targetText)
 	{
+		this.fileModeRButton.setEnabled(false);
+		this.inputModeRButton.setEnabled(false);
+		
 		String compressedText = "";
 		if (this.inputModeRButton.isSelected()) {
 			try {
@@ -124,12 +132,14 @@ public class AppFrame extends JFrame implements ActionListener
 				}
 			} catch (IOException iex) {
 				JOptionPane.showMessageDialog(null, "<html>Oops! We had a problem retrieving the selected file. Make sure it<br>exists and you have permissions to access the file.", "An error while compressing text", JOptionPane.ERROR_MESSAGE);
+				this.resetTree();
 				return;
 			} catch (FileFormatException ffex) {
 				JOptionPane.showMessageDialog(null, "<html>" + ffex.getMessage() + " Make sure each line in the file follows the format:<br>[character (there must only be one here)]-[frequency (must be an integer)].</html>", "An error while compressing text", JOptionPane.ERROR_MESSAGE);
+				this.resetTree();
 				return;
 			} catch (NoSuchCharacterInMappingException nex) {
-				JOptionPane.showMessageDialog(null, "<html>Your input string contains characters that do not have a corresponding Huffman code<br>from the selected file. We suggest adding the anomalous character to your statistical distribution file.</html>", "An error while compressing text", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "<html>Your input string contains characters that do not have a corresponding Huffman code<br>from the selected file. We suggest adding the anomalous character to your statistical<br>distribution file and click 'Reset Tree', or remove the anomalous character<br>from the input string and click 'Compress' again.</html>", "An error while compressing text", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 		}
@@ -137,6 +147,7 @@ public class AppFrame extends JFrame implements ActionListener
 		this.resetButton.setEnabled(true);
 		this.showCodingButton.setEnabled(true);
 		this.showTreeButton.setEnabled(true);
+		this.modeMessageLabel.setText(" ");
 		this.outputTextField.setCaretPosition(0);		
 		this.outputTextField.setText(compressedText);
 	}
@@ -149,17 +160,61 @@ public class AppFrame extends JFrame implements ActionListener
 	private void showTree()
 	{
 		Graph huffmanTree = new SingleGraph("Generated Huffman Tree");
-		huffmanTree.addNode("A");
-		huffmanTree.addNode("B");
-		huffmanTree.addNode("C");
-		huffmanTree.addEdge("AB", "A", "B");
-		huffmanTree.addEdge("AC", "A", "C");
+		SpriteManager spriteManager = new SpriteManager(huffmanTree);
 		huffmanTree.addAttribute("ui.quality");
 		huffmanTree.addAttribute("ui.antialias");
+		huffmanTree.addAttribute("ui.title", "Generated Huffman Tree");
 		
 		Viewer treeViewer = huffmanTree.display();
-		treeViewer.enableAutoLayout();
+		HierarchicalLayout hLayout = new HierarchicalLayout();
+		treeViewer.enableAutoLayout(hLayout);
 		treeViewer.setCloseFramePolicy(Viewer.CloseFramePolicy.CLOSE_VIEWER);
+		
+		huffmanTree = this.addNodesToGraph(this.tree.getTreeRoot(), spriteManager, huffmanTree, 0, "", true);
+	}
+	
+	private Graph addNodesToGraph(HuffmanNode currentNode, SpriteManager spriteManager, Graph tree, int nodeNum, String prevNodeID, boolean isRoot)
+	{
+		String id = UUID.randomUUID().toString();
+
+		String label = "";
+		char letter = currentNode.getLetter();
+		int frequency = currentNode.getFrequency();		
+		if (letter == '\0') {
+			if (isRoot) { // The root will always have '\0' as its 'letter'.
+				label = "(root) ";
+				isRoot = false;
+			}
+			label += "Frequency: " + frequency;
+		} else {
+			label = "Character: '" + letter + "' | Frequency: " + frequency;
+		}
+		
+		Node node = tree.addNode(id);
+		node.addAttribute("ui.label", label);
+		Sprite sprite = spriteManager.addSprite(id);
+		sprite.attachToNode(id);
+		
+		if (!prevNodeID.equals("")) {
+			String edgeID = prevNodeID + UUID.randomUUID().toString();
+			Edge edge = tree.addEdge(edgeID, id, prevNodeID);
+			
+			if (currentNode.getParent().getLeftChild() == currentNode) {
+				edge.addAttribute("ui.label", "0");
+			} else if (currentNode.getParent().getRightChild() == currentNode) {
+				edge.addAttribute("ui.label", "1");
+			}
+		}
+		
+		if (currentNode.getLeftChild() != null) {
+			this.addNodesToGraph(currentNode.getLeftChild(), spriteManager, tree, nodeNum++, id, false);
+		}
+		
+		if (currentNode.getRightChild() != null) {
+			this.addNodesToGraph(currentNode.getRightChild(), spriteManager, tree, nodeNum++, id, false);
+		}
+		
+		return tree;
 	}
 	
 	private void showCoding()

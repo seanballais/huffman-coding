@@ -192,8 +192,13 @@ public class HuffmanTree
 		parent.setLeftChild(leftChild);
 		parent.setRightChild(rightChild);
 		
-		leftChild.setParent(parent);
-		rightChild.setParent(parent);
+		if (leftChild != null) {
+			leftChild.setParent(parent);
+		}
+		
+		if (rightChild != null) {
+			rightChild.setParent(parent);
+		}
 		
 		return parent;
 	}
@@ -201,8 +206,13 @@ public class HuffmanTree
 	private HashMap<Character, String> getCharacterMapping(HashMap<Character, String> mapping, HuffmanNode node, String code)
 	{
 		if (node.getLetter() == '\0') {
-			getCharacterMapping(mapping, node.getLeftChild(), code + "0");
-			getCharacterMapping(mapping, node.getRightChild(), code + "1");
+			if (node.getLeftChild() != null) {
+				this.getCharacterMapping(mapping, node.getLeftChild(), code + "0");
+			}
+			
+			if (node.getRightChild() != null) {
+				this.getCharacterMapping(mapping, node.getRightChild(), code + "1");
+			}
 		}
 		
 		// Found the corresponding code for a character.
@@ -223,6 +233,10 @@ public class HuffmanTree
 			HuffmanNode rightChild = nodes.poll();
 			
 			nodes.add(this.createSubtree(parent, leftChild, rightChild));
+		}
+		
+		if (nodes.size() == 1 && nodes.peek().getLetter() != '\0') {
+			nodes.add(this.createSubtree(new HuffmanNode('\0', 0), nodes.poll(), null));
 		}
 		
 		this.root = nodes.poll(); // Get the last remaining node in the queue which is the resulting Huffman Tree
