@@ -1,8 +1,9 @@
 *.class
 
 # Ignore Eclipse specific files
-.classpath/
-build/
+.classpath
+.gradle/
+build/*
 bin/
 
 # Mobile Tools for Java (J2ME)

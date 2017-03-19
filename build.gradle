@@ -37,3 +37,9 @@ sourceSets {
     	}
     }
 }
+
+jar {
+	manifest {
+		attributes "Main-Class": "app.App"
+	}
+}
