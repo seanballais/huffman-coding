@@ -2,6 +2,8 @@
 
 # Ignore Eclipse specific files
 .classpath/
+build/
+bin/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
